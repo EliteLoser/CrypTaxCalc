@@ -4,7 +4,7 @@ Svendsen Tech's CrypTaxCalc is an open-source Coinbase transaction log parser to
 
 It handles buy, sell, convert, send, receive (untested) and rewards such as Coinbase learn and APY (looks for "reward" in the transaction type field). This was a great deal of work and trial and error to get right. Currently, it works perfectly against my own data that I use to test.
 
-Currently, as of February 9, 2023, it works against unaltered, downloaded CSV reports from Coinbase.com.
+Currently, as of February 10, 2023, it works against unaltered, downloaded CSV reports from Coinbase.com.
 
 It supports the following sort orders for calculations (you can choose freely in some countries, such as Norway, which sort order to use): FIFO, LIFO, HPFO and LPFO. First in, first out. Last in, first out. Highest price first out. Lowest price first out.
 
