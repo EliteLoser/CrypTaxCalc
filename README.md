@@ -10,7 +10,7 @@ HPFO is the most financially wise option for most.
 
 # Screenshot
 
-[CrypTaxCalc example](!/Images/cryptaxcalc-example.png)
+![CrypTaxCalc example](/Images/cryptaxcalc-example.png)
 
 # Examples
 
