@@ -8,6 +8,10 @@ It supports the following sort orders for calculations (you can choose freely in
 
 HPFO is the most financially wise option for most.
 
+# Screenshot
+
+[CrypTaxCalc example](/Images/cryptaxcalc-example.png)
+
 # Examples
 
 Examples of use against an unaltered Coinbase transaction log as of 2023-02-03.
