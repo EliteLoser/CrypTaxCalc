@@ -13,7 +13,10 @@ HPFO is the most financially wise option for most.
 Examples of use against an unaltered Coinbase transaction log as of 2023-02-03.
 
 ```
-PS /home/joakim/Documents> ./CrypTaxCalc.ps1 -FilePath ./Coinbase-TransactionsHistoryReport-2023-02-03-23-20-48.csv -SortOrder HPFO -Year 2017                         
+PS /home/joakim/Documents> ./CrypTaxCalc.ps1 `
+    -FilePath ./Coinbase-TransactionsHistoryReport-2023-02-03-23-20-48.csv `
+    -SortOrder HPFO -Year 2017
+
 Total sum of rewards in year 2017 (taxable income): 0.00
 
 
@@ -28,7 +31,11 @@ ETH  1.02400397
 -----------------------
 
 
-PS /home/joakim/Documents> ./CrypTaxCalc.ps1 -FilePath ./Coinbase-TransactionsHistoryReport-2023-02-03-23-20-48.csv -SortOrder HPFO -Year 2018
+
+PS /home/joakim/Documents> ./CrypTaxCalc.ps1 `
+    -FilePath ./Coinbase-TransactionsHistoryReport-2023-02-03-23-20-48.csv `
+    -SortOrder HPFO -Year 2018
+
 Total sum of rewards in year 2018 (taxable income): 0.00
 
 
@@ -50,7 +57,11 @@ ETH   6032.590
 
 
 
-PS /home/joakim/Documents> ./CrypTaxCalc.ps1 -FilePath ./Coinbase-TransactionsHistoryReport-2023-02-03-23-20-48.csv -SortOrder HPFO -Year 2019
+
+PS /home/joakim/Documents> ./CrypTaxCalc.ps1 `
+    -FilePath ./Coinbase-TransactionsHistoryReport-2023-02-03-23-20-48.csv `
+    -SortOrder HPFO -Year 2019
+
 Total sum of rewards in year 2019 (taxable income): 113.93
 
 
