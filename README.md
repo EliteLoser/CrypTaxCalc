@@ -8,7 +8,7 @@ Currently, as of February 10, 2023, it works against unaltered, downloaded CSV r
 
 It supports the following sort orders for calculations (you can choose freely in some countries, such as Norway, which sort order to use): FIFO, LIFO, HPFO and LPFO. First in, first out. Last in, first out. Highest price first out. Lowest price first out.
 
-HPFO is the most financially wise option for most.
+HPFO is the financially wiser option for most.
 
 # Screenshot
 
