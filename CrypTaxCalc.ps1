@@ -22,7 +22,7 @@ $Result = @{}
 foreach ($CsvLine in Get-Content -LiteralPath $FilePath |
     Select-Object -Skip ($HeaderLine - 1) | 
     ConvertFrom-Csv -Delimiter $Delimiter |
-    Where-Object {$_.Timestamp -match '\S' -and $_.Asset -match $CoinSlug}) {
+    Where-Object {$_.Timestamp -match '\S'}) {
     $Data[([DateTime]$CsvLine.Timestamp)] = $CsvLine
     #$Data[($CsvLine.Timestamp + ', ' + ('{0:D3}' -f (++$Counter)))] = $CsvLine
 }
