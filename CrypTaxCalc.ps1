@@ -12,7 +12,7 @@ Param(
     [Switch]$ListUsedBuyQuantities
 )
 
-$Script:Version = '3.0.1'
+$Script:Version = '3.0.2'
 
 $Data = @{}
 #$Counter = 0
@@ -272,7 +272,14 @@ if (($SalesAndConversions = @($Result.Values.Where({$_.Type -match 'Sell|Convert
 }
 
 "-----------------------`n"
-"# SUMMARY`n`nResult of all individual results (all results added up) for year ${Year}:"
-$AssetResults.Result | Measure-Object -Sum | Select-Object -ExpandProperty Sum
-"-----------------------`n`n"
+
+if ($AssetResults.Count -gt 0) {
+    @"
+# SUMMARY`n`nResult of all individual sales and conversion
+results (all results added up) for year ${Year}:
+"@
+    $AssetResults.Result | Measure-Object -Sum | Select-Object -ExpandProperty Sum
+    "`nNumber of sales and conversions: " + $AssetResults.Count
+    "-----------------------`n`n"
+}
 
