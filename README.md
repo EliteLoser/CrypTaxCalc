@@ -2,7 +2,7 @@
 
 Svendsen Tech's CrypTaxCalc is an open-source Coinbase transaction log parser to get the numbers you need for the tax reports.
 
-It handles buy, sell, convert, send, receive (untested) and rewards such as Coinbase learn and APY (looks for "Buy|Learn|Reward|Receive" in the transaction type field). This was a great deal of work and trial and error to get right. Currently, it works perfectly against my own data that I use to test.
+It handles buy, sell, convert, send, receive (untested) and rewards such as Coinbase learn and APY (looks for ```Buy|Learn|Reward|Receive``` in the transaction type field). This was a great deal of work and trial and error to get right. Currently, it works perfectly against my own data that I use to test.
 
 Currently, as of February 10, 2023, it works against unaltered, downloaded CSV reports from Coinbase.com.
 
