@@ -9,11 +9,10 @@ Param(
     [Parameter(Mandatory)][ValidateSet('FIFO', 'LIFO', 'HPFO', 'LPFO')][String]$SortOrder,
     [String]$Delimiter = ',',
     [Int]$HeaderLine = 8,
-    [Switch]$ListUsedBuyQuantities,
-    [Switch]$ShowSummary
+    [Switch]$ListUsedBuyQuantities
 )
 
-$Script:Version = '3.0.0'
+$Script:Version = '3.0.1'
 
 $Data = @{}
 #$Counter = 0
@@ -196,26 +195,30 @@ function Get-RelevantBuyStack {
 # The sort on "Name" is an ISO8601 timestamp, so this is FIFO for sales.
 foreach ($Asset in $Data.Values.Asset | Sort-Object -Unique) {
     foreach ($Transaction in $Data.GetEnumerator() | Sort-Object -Property Name) {
-        if ($Transaction.Value.'Transaction Type' -match 'Sell|Convert|Send' -and ([DateTime]$Transaction.Value.'Timestamp').Year -eq $Year `
-            -and $Transaction.Value.Asset -eq $Asset) {
+        if ($Transaction.Value.'Transaction Type' -match 'Sell|Convert|Send' -and `
+          ([DateTime]$Transaction.Value.'Timestamp').Year -eq $Year `
+          -and $Transaction.Value.Asset -eq $Asset) {
             Get-RelevantBuyStack -SellDate $Transaction.Value.Timestamp -Asset $Asset
-            Write-Verbose "Year $Year. Processing a $($Transaction.Value.'Transaction Type') of asset $($Transaction.Value.Asset). Quantity of tokens: $($Transaction.Value.'Quantity Transacted')"
+            Write-Verbose "Year $Year. Processing a $($Transaction.Value.'Transaction Type'
+                ) of asset $($Transaction.Value.Asset
+                ). Quantity of tokens: $($Transaction.Value.'Quantity Transacted')"
             Invoke-TransactionParser -Transaction $Transaction -Quantity $Transaction.Value.'Quantity Transacted'
         }
     }
 }
 # Calculate rewards and Coinbase learn (income) for the specified year.
 $CryptoIncome = @{}
-foreach ($Transaction in Get-Content -LiteralPath $FilePath |
+foreach ($Transaction in $Data.Values) {
+    <#Get-Content -LiteralPath $FilePath |
     Select-Object -Skip ($HeaderLine - 1) | 
     ConvertFrom-Csv -Delimiter $Delimiter |
     Where-Object {$_.Timestamp -match '\S'} | 
-    Sort-Object -Property Name) {
-    if ($Transaction.'Transaction Type' -match 'Reward|Learn' -and ([DateTime]$Transaction.'Timestamp').Year -eq $Year) {
+    Sort-Object -Property Name)#>
+    if ($Transaction.'Transaction Type' -match 'Reward|Learn' -and ([DateTime]$Transaction.Timestamp).Year -eq $Year) {
         #Get-RelevantBuyStack -SellDate $Transaction.Value.Timestamp
         #Write-Verbose "Year $Year. Processing a reward. Asset: $($Transaction.Asset). Quantity of tokens: $($Transaction.'Quantity Transacted'). Money: $($Transaction.'Total (inclusive of fees and/or spread)')."
         #Invoke-TransactionParser -Transaction $Transaction -Quantity $Transaction.Value.'Quantity Transacted'
-        $CryptoIncome.($Transaction.'Asset') += [Decimal]$Transaction.'Total (inclusive of fees and/or spread)'
+        $CryptoIncome.($Transaction.Asset) += [Decimal]$Transaction.'Total (inclusive of fees and/or spread)'
     }
 }
 
@@ -227,11 +230,12 @@ if ($CryptoIncome.Keys.Count -gt 0) {
 
 # Amounts owned of each asset.
 $AssetHoldings = @{}
-foreach ($Transaction in Get-Content -LiteralPath $FilePath |
+foreach ($Transaction in $Data.Values) {
+    <#Get-Content -LiteralPath $FilePath |
     Select-Object -Skip ($HeaderLine - 1) | 
     ConvertFrom-Csv -Delimiter $Delimiter |
     Where-Object {$_.Timestamp -match '\S'} | 
-    Sort-Object -Property Name) {
+    Sort-Object -Property Name)#>
     if (([DateTime]$Transaction.Timestamp).Year -gt $Year) {
         continue
     }
@@ -254,16 +258,21 @@ $AssetHoldings.GetEnumerator() | Where-Object Value -gt 0 | Format-Table -AutoSi
 
 if (($SalesAndConversions = @($Result.Values.Where({$_.Type -match 'Sell|Convert'}))).Count -gt 0) {
     "Sales and conversions:"
-    foreach ($OutgoingQuantity in $SalesAndConversions) {
-        $AssetResult = $Result.Values.Where({$_.Type -match 'Sell|Convert' -and $_.Asset -eq $OutgoingQuantity.Asset}) |
+    $AssetResults = @(foreach ($SaleOrConversion in $SalesAndConversions) {
+        $AssetResult = $Result.Values.Where({$_.Type -match 'Sell|Convert' -and $_.Asset -eq $SaleOrConversion.Asset}) |
             ForEach-Object {[Decimal]$_.NetGainOrLoss} |
             Measure-Object -Sum | 
             Select-Object -ExpandProperty Sum
         [PSCustomObject]@{
-            Asset = $OutgoingQuantity.Asset
+            Asset = $SaleOrConversion.Asset
             Result = $AssetResult
         }
-    }
+    })
+    $AssetResults
 }
 
+"-----------------------`n"
+"# SUMMARY`n`nResult of all individual results (all results added up) for year ${Year}:"
+$AssetResults.Result | Measure-Object -Sum | Select-Object -ExpandProperty Sum
 "-----------------------`n`n"
+
