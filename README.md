@@ -14,6 +14,10 @@ It supports the following sort orders for calculations (you can choose freely in
 
 HPFO is the financially wiser option for most.
 
+# Known bugs!
+
+As of 2023-03-22, CrypTaxCalc has a known bug that could cause incorrect calculations for sales. This is corrected in the "fix-bug1" branch currently, but that version has a bug with the "asset holdings" summary. So, currently, you need to use the version in the fix-bug1 branch for accurate sales - and the main version for accurate asset holdings. Both versions appear to support earnings/rewards. Limited testing. Obviously, this is not acceptable. Hope to fix it, but I'm pretty lost at the moment. I don't even touch the data structure that becomes different in the processed output.
+
 # Screenshot
 
 ![CrypTaxCalc example](/Images/cryptaxcalc-example.png)
