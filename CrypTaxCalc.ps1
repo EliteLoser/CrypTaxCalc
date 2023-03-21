@@ -261,8 +261,8 @@ foreach ($Transaction in (#$Data.Values | Sort-Object -Property Timestamp) {
 }
 
 "Asset holdings at the end of year ${Year}:"
-$AssetHoldings.GetEnumerator() | Format-Table -AutoSize
-#| Where-Object Value -gt 0 | Format-Table -AutoSize
+$AssetHoldings.GetEnumerator() | Where-Object Value -gt 0 | Format-Table -AutoSize
+#| Format-Table -AutoSize
 
 if (($SalesAndConversions = @($Result.Values.Where({$_.Type -match 'Sell|Convert'}))).Count -gt 0) {
     "Sales and conversions:"
