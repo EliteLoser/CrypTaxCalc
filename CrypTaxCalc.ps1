@@ -12,7 +12,7 @@ Param(
     [Switch]$ListUsedBuyQuantities
 )
 
-$Script:Version = '3.0.2'
+$Script:Version = '3.0.3'
 
 $Data = @{}
 #$Counter = 0
@@ -232,12 +232,14 @@ if ($CryptoIncome.Keys.Count -gt 0) {
 
 # Amounts owned of each asset.
 $AssetHoldings = @{}
-foreach ($Transaction in $Data.Values | Sort-Object -Property Timestamp) {
-    <#Get-Content -LiteralPath $FilePath |
+foreach ($Transaction in (#$Data.Values | Sort-Object -Property Timestamp) {
+    # Something weird is going on where $Data is manipulated in memory.
+    # This works around a bug, by rereading the CSV file.
+    Get-Content -LiteralPath $FilePath |
     Select-Object -Skip ($HeaderLine - 1) | 
     ConvertFrom-Csv -Delimiter $Delimiter |
     Where-Object {$_.Timestamp -match '\S'} | 
-    Sort-Object -Property Name)#>
+    Sort-Object -Property Timestamp)) {
     if (([DateTime]$Transaction.Timestamp).Year -gt $Year) {
         continue
     }
@@ -289,11 +291,11 @@ results (all results added up) for year ${Year}:
     "-----------------------`n`n"
 }
 
-$Global:CoinData = $Data
-$Global:CoinResult = $Result
-
+# Debug
+#$Global:CoinData = $Data
+#$Global:CoinResult = $Result
 <#
-Seeing so far inexplicable behaviour. I included sales from previous
+2023-03-21: Seeing so far inexplicable behaviour. I included sales from previous
 years, to correct a bug in the previous version of CrypTaxCalc where it
 includes all rewards, converts, receives and buys for every sale (potentially
 repeated, then, for multiple sales). I am not touching the $Data structure
@@ -303,31 +305,6 @@ become zero or seemingly rounded. I can't make any sense of it. Not even
 touching the data structure. First thoughts are somehow reference types and
 rounding, but it is only for _some_ of the quantities... Weird.
 
-
-PS /home/joakim/Documents> $CoinData.Values | Sort-Object Timestamp | select -first 20 | ft -a
-
-Timestamp            Transaction Type Asset Quantity Transacted Spot Price Currency Spot Price at Transaction Subtotal Total (inclusive of
-                                                                                                                       fees and/or spread)
----------            ---------------- ----- ------------------- ------------------- ------------------------- -------- ----------------------
-2017-10-29T23:43:27Z Buy              ETH                 0.000 NOK                 2489.54                   2549.28  2650.96               
-2017-11-02T05:50:56Z Buy              BTC            0.01587235 NOK                 56885.28                  902.90   938.94                
-2017-11-03T23:24:53Z Buy              LTC                 1.094 NOK                 461.28                    930.44   967.53                
-2017-12-14T01:03:14Z Buy              LTC            1.09383014 NOK                 2576.70                   2818.50  2930.95               
-2017-12-17T09:45:56Z Buy              BTC                 0.000 NOK                 165349.11                 1896.31  1971.94               
-2017-12-30T22:09:15Z Buy              BTC                 0.010 NOK                 114455.63                 3788.76  3939.95               
-2017-12-30T22:17:17Z Send             BTC            0.03436041 NOK                 108594.08                                                
-2018-01-17T22:20:40Z Sell             ETH            1.02400397 NOK                 8507.46                   8711.68  8581.90               
-2018-01-19T16:33:54Z Sell             BTC            0.01146855 NOK                 93782.70                  1075.55  1046.80               
-2018-01-22T20:35:48Z Sell             LTC            2.01719317 NOK                 1385.73                   2795.24  2753.63               
-2019-05-30T15:39:26Z Learning Reward  XLM            14.1611969 NOK                 1.24                      17.56    17.56                 
-2019-05-30T15:42:04Z Learning Reward  XLM            14.1416213 NOK                 1.24                      17.54    17.54                 
-2019-05-30T15:44:25Z Learning Reward  XLM            14.1147743 NOK                 1.24                      17.50    17.50                 
-2019-05-30T15:49:16Z Learning Reward  XLM            14.0546656 NOK                 1.24                      17.43    17.43                 
-2019-05-30T15:52:34Z Learning Reward  XLM            14.0500745 NOK                 1.24                      17.42    17.42                 
-2019-05-30T16:04:35Z Learning Reward  BAT            2.72441334 NOK                 3.29                      8.96     8.96                  
-2019-05-30T16:06:10Z Learning Reward  BAT                 0.000 NOK                 3.26                      8.76     8.76                  
-2019-05-30T16:07:02Z Learning Reward  BAT            2.68799863 NOK                 3.26                      8.76     8.76                  
-2019-05-30T16:40:28Z Buy              XLM              1171.401 NOK                 1.22                      9394.12  9768.95               
-2019-10-21T18:01:08Z Buy              BTC                 0.162 NOK                 75376.77                  25093.67 25467.54              
-
+2023-03-22: The bug seems fixed by rereading the CSV. Somehow the $Data
+variable is manipulated in memory.
 #>
