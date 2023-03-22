@@ -12,7 +12,7 @@ Param(
     [Switch]$ListUsedBuyQuantities
 )
 
-$Script:Version = '3.0.2'
+$Script:Version = '3.0.3'
 
 $Data = @{}
 #$Counter = 0
@@ -68,7 +68,8 @@ function Invoke-TransactionParser {
         $NetGainOrLoss = [Math]::Round((([Decimal]$Transaction.Value.'Quantity Transacted' * [Decimal]$Transaction.Value.'Spot Price at Transaction' - `
                 [Decimal]$Transaction.Value.'Fees and/or Spread') - (
                 $Quantity * [Decimal]$SpotPriceAtTransaction + $CarryOverSum)), 2)
-        if ($Transaction.Value.'Transaction Type' -ne 'Send') {
+        if ($Transaction.Value.'Transaction Type' -ne 'Send' -and `
+            ([DateTime]$Transaction.Value.Timestamp).Year -eq $Year) {
             $Result[$Transaction.Name] += @([PSCustomObject]@{
                 Asset = $Transaction.Value.Asset
                 Quantity = $Transaction.Value.'Quantity Transacted'
@@ -101,7 +102,8 @@ function Invoke-TransactionParser {
             })."
     }
     else {
-        Write-Verbose "$($Transaction.Value.'Transaction Type') ($Quantity) spans over the current buy Quantity ($($Global:SvendsenTechBuyStack[0].Value.'Quantity Transacted'))."
+        Write-Verbose "$($Transaction.Value.'Transaction Type') ($Quantity) spans over the current buy Quantity ($(
+            $Global:SvendsenTechBuyStack[0].Value.'Quantity Transacted'))."
         if ($ListUsedBuyQuantities) {
             $Result[$Transaction.Name] += @([PSCustomObject]@{
                 Asset = $Global:SvendsenTechBuyStack[0].Value.Asset
@@ -196,12 +198,12 @@ function Get-RelevantBuyStack {
 foreach ($Asset in $Data.Values.Asset | Sort-Object -Unique) {
     foreach ($Transaction in $Data.GetEnumerator() | Sort-Object -Property Name) {
         if ($Transaction.Value.'Transaction Type' -match 'Sell|Convert|Send' -and `
-          ([DateTime]$Transaction.Value.'Timestamp').Year -eq $Year `
+          ([DateTime]$Transaction.Value.'Timestamp').Year -le $Year `
           -and $Transaction.Value.Asset -eq $Asset) {
             Get-RelevantBuyStack -SellDate $Transaction.Value.Timestamp -Asset $Asset
-            Write-Verbose "Year $Year. Processing a $($Transaction.Value.'Transaction Type'
-                ) of asset $($Transaction.Value.Asset
-                ). Quantity of tokens: $($Transaction.Value.'Quantity Transacted')"
+            Write-Verbose "Year $(([DateTime]$Transaction.Value.'Timestamp').Year). Processing a $($Transaction.Value.'Transaction Type'
+                ) of asset --- $($Transaction.Value.Asset
+                ) ---. Quantity of tokens: $($Transaction.Value.'Quantity Transacted')"
             Invoke-TransactionParser -Transaction $Transaction -Quantity $Transaction.Value.'Quantity Transacted'
         }
     }
@@ -230,24 +232,29 @@ if ($CryptoIncome.Keys.Count -gt 0) {
 
 # Amounts owned of each asset.
 $AssetHoldings = @{}
-foreach ($Transaction in $Data.Values) {
-    <#Get-Content -LiteralPath $FilePath |
+foreach ($Transaction in (#$Data.Values | Sort-Object -Property Timestamp) {
+    # Something weird is going on where $Data is manipulated in memory.
+    # This works around a bug, by rereading the CSV file.
+    Get-Content -LiteralPath $FilePath |
     Select-Object -Skip ($HeaderLine - 1) | 
     ConvertFrom-Csv -Delimiter $Delimiter |
     Where-Object {$_.Timestamp -match '\S'} | 
-    Sort-Object -Property Name)#>
+    Sort-Object -Property Timestamp)) {
     if (([DateTime]$Transaction.Timestamp).Year -gt $Year) {
         continue
     }
     #Write-Verbose "Processing a $($Transaction.'Transaction Type') transaction. Asset: $($Transaction.Asset). Quantity of tokens: $($Transaction.'Quantity Transacted')."
     #Invoke-TransactionParser -Transaction $Transaction -Quantity $Transaction.Value.'Quantity Transacted'
     if ($Transaction.'Transaction Type' -match 'Buy|Reward|Receive') {
+        Write-Verbose ("Adding (plus) a " + $Transaction.'Transaction Type'.ToLower() + " of " + $Transaction.'Quantity Transacted' + " " + $Transaction.Asset)
         $AssetHoldings.($Transaction.'Asset') += [Decimal]$Transaction.'Quantity Transacted'
     }
     elseif ($Transaction.'Transaction Type' -match 'Sell|Convert|Send') {
+        Write-Verbose ("Subtracting a " + $Transaction.'Transaction Type' + " of " + $Transaction.'Quantity Transacted' + " " + $Transaction.Asset)
         $AssetHoldings.($Transaction.'Asset') -= [Decimal]$Transaction.'Quantity Transacted'
         if ($Transaction.'Transaction Type' -match 'Convert') {
             [Decimal]$ConvertedToQuantity, $ConvertedToAsset = ($Transaction.Notes.TrimEnd() -split '\s+')[-2,-1]
+            Write-Verbose ("Adding (plus) a " + $Transaction.'Transaction Type'.ToLower() + " to $ConvertedToQuantity $ConvertedToAsset")
             $AssetHoldings[$ConvertedToAsset] += $ConvertedToQuantity
         }
     }
@@ -255,6 +262,7 @@ foreach ($Transaction in $Data.Values) {
 
 "Asset holdings at the end of year ${Year}:"
 $AssetHoldings.GetEnumerator() | Where-Object Value -gt 0 | Format-Table -AutoSize
+#| Format-Table -AutoSize
 
 if (($SalesAndConversions = @($Result.Values.Where({$_.Type -match 'Sell|Convert'}))).Count -gt 0) {
     "Sales and conversions:"
@@ -283,3 +291,20 @@ results (all results added up) for year ${Year}:
     "-----------------------`n`n"
 }
 
+# Debug
+#$Global:CoinData = $Data
+#$Global:CoinResult = $Result
+<#
+2023-03-21: Seeing so far inexplicable behaviour. I included sales from previous
+years, to correct a bug in the previous version of CrypTaxCalc where it
+includes all rewards, converts, receives and buys for every sale (potentially
+repeated, then, for multiple sales). I am not touching the $Data structure
+at all, but if I change from -eq $Year to -le $Year (and add logic to only
+return the specified year's sales), suddenly some of the "Quantity transacted"
+become zero or seemingly rounded. I can't make any sense of it. Not even
+touching the data structure. First thoughts are somehow reference types and
+rounding, but it is only for _some_ of the quantities... Weird.
+
+2023-03-22: The bug seems fixed by rereading the CSV. Somehow the $Data
+variable is manipulated in memory.
+#>
