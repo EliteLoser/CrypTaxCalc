@@ -16,7 +16,7 @@ HPFO is the financially wiser option for most.
 
 # Known bugs!
 
-The "LIFO" sort order needs some attention, I think.
+The "LIFO" and "LPFO" sort orders needs some attention, I think.
 
 # Screenshot
 
