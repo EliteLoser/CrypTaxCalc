@@ -6,15 +6,11 @@ It uses the cross-platform PowerShell framework's associated scripting language,
 
 If you are a Windows user, you already have PowerShell 5.1 installed, and can use that to run the script.
 
-It handles buy, sell, convert, send, receive (untested) and rewards such as Coinbase learn and APY (looks for ```Buy|Learn|Reward|Receive|Staking``` in the transaction type field). This was a great deal of work and trial and error to get right. Currently, as the year 2024 arrived, I have made some changes to the code to support different data in the report such as that it now includes EUR sales and buys. I decided to omit the "base currency", which for me is EUR (EUR is the default, but I made it a parameter, e.g. "-BaseCurrency USD" if it's different for you).
+It handles buy, sell, convert, send, receive (untested) and rewards such as Coinbase learn and APY (looks for ```Buy|Learn|Reward|Receive``` in the transaction type field). This was a great deal of work and trial and error to get right. Currently, as the year 2024 arrived, and a few weeks went by (I forked a new branch on 2024-01-01 that is now obsolete), the downloaded report has changed since the one I downloaded on New Year's Eve, and the old code again works. The old code didn't work against the new report format I encountered on New Year's Eve, so I started working on changes to adapt, but encountered inconsistencies with wrong currencies in the report from Coinbase.
 
 # 2024 = Work In Progress
 
-As of February 10, 2023, it worked against unaltered, downloaded CSV reports from Coinbase.com. As of January 1st, 2024, some things have changed. The reports now apparently include other/more data than last year, because my calculations produce different numbers using the previously saved log and a newly downloaded one, but this could also be due to the errors I have revealed. I noticed several grave errors/inconsistencies in the data, such as the spot rate currency being listed as NOK, while the amount is actually obviously EUR, for some, but not all of the fields, and different for different types. Staking income has one "set" of properties/errors while buy/sell has different errors.
-
-But this is not the case for all types of transactions - and in September it was more correct than the data from December. I tried chatting with Coinbase late on New Year's Eve, but couldn't reach a human, will try to reach them somehow. I need to make them aware of these bugs/errors in the data.
-
-Staking income is always listed in EUR, despite the currency being listed as NOK. It's quite complex to convey exactly what is wrong. The Subtotal and Total columns sometimes use EUR and sometimes NOK (supposed to always be NOK). The "fee" column appears to always be correct for the data I have manually reviewed. It is severely flawed and unusable as a data source for a report until Coinbase fixes these bugs.
+As of January 13, 2024, it works against unaltered, downloaded CSV reports from Coinbase.com. 
 
 It supports the following sort orders for calculations (you can choose freely in some countries, such as Norway, which sort order to use): FIFO, LIFO, HPFO and LPFO. First in, first out. Last in, first out. Highest price first out. Lowest price first out. I am not 100 % confident about the LIFO and LPFO sort orders.
 
@@ -23,6 +19,8 @@ HPFO is presumably the financially wiser option for most.
 # Known bugs!
 
 I think the "LIFO" and "LPFO" sort orders need some attention.
+
+There can be rounding errors that lead to (typically) very small amounts of assets shown as "held" at the end of the year, such as with `NEAR 0.000000000000003` for me, which is actually `0.0`.
 
 # Screenshot
 
