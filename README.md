@@ -6,7 +6,7 @@ It uses the cross-platform PowerShell framework's associated scripting language,
 
 If you are a Windows user, you already have PowerShell 5.1 installed, and can use that to run the script.
 
-It handles buy, sell, convert, send, receive (untested) and rewards such as Coinbase learn and APY (looks for ```Buy|Learn|Reward|Receive``` in the transaction type field). This was a great deal of work and trial and error to get right. Currently, as the year 2024 arrived, and a few weeks went by (I forked a new branch on 2024-01-01 that is now obsolete), the downloaded report has changed since the one I downloaded on New Year's Eve, and the old code again works. The old code didn't work against the new report format I encountered on New Year's Eve, so I started working on changes to adapt, but encountered inconsistencies with wrong currencies in the report from Coinbase.
+It handles buy, sell, convert, send, receive (untested) and rewards such as Coinbase learn and APY (looks for ```Buy|Learn|Reward|Receive``` in the transaction type field). This was a great deal of work and trial and error to get right. Currently, as the year 2024 has arrived, the existing code works.
 
 # 2024
 
