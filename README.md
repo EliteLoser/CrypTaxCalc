@@ -6,7 +6,7 @@ It uses the cross-platform PowerShell framework's associated scripting language,
 
 If you are a Windows user, you already have PowerShell 5.1 installed, and can use that to run the script.
 
-It handles buy, sell, convert, send, receive (untested) and rewards such as Coinbase learn and APY (looks for ```Buy|Learn|Reward|Receive``` in the transaction type field). This was a great deal of work and trial and error to get right. Currently, as the year 2024 has arrived, the existing code works.
+It handles buy, sell, convert, send, receive and rewards such as Coinbase learn and APY (looks for ```Buy|Learn|Reward|Receive``` in the transaction type field). This was a great deal of work and trial and error to get right. Currently, as the year 2024 has arrived, the existing code works.
 
 # 2024
 
