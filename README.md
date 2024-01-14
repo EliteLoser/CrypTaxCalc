@@ -18,8 +18,6 @@ HPFO is presumably the financially wiser option for most.
 
 # Known bugs!
 
-I think the "LIFO" and "LPFO" sort orders need some attention.
-
 There can be rounding errors that lead to (typically) very small amounts of assets shown as "held" at the end of the year, such as with `NEAR 0.000000000000003` for me, which is actually `0.0`.
 
 # Screenshot
