@@ -12,7 +12,7 @@ It handles buy, sell, convert, send, receive (untested) and rewards such as Coin
 
 As of January 13, 2024, it works against unaltered, downloaded CSV reports from Coinbase.com. 
 
-It supports the following sort orders for calculations (you can choose freely in some countries, such as Norway, which sort order to use): FIFO, LIFO, HPFO and LPFO. First in, first out. Last in, first out. Highest price first out. Lowest price first out. I am not 100 % confident about the LIFO and LPFO sort orders.
+It supports the following sort orders for calculations (you can choose freely in some countries, such as Norway, which sort order to use): FIFO, LIFO, HPFO and LPFO. First in, first out. Last in, first out. Highest price first out. Lowest price first out.
 
 HPFO is presumably the financially wiser option for most.
 
