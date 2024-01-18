@@ -107,38 +107,48 @@ PS /home/joakim/Documents> ./CrypTaxCalc.ps1 -FilePath ./Coinbase-2024-01-12.csv
     -Year 2023 -SortOrder HPFO
 Total sum of rewards in year 2023 (taxable income): 214.29
 
+
 Distribution of income:
 
 Name Value
 ---- -----
 ADA  55.06
 AMP  11.52
-SOL  114.61
 NEAR 33.10
+SOL  114.61
+
+
+Number of rewards/income per asset:
+
+Name Value
+---- -----
+ADA  70
+AMP  1
+NEAR 3
+SOL  158
 
 Asset holdings at the end of year 2023:
 
 Name Value
 ---- -----
-ETH2 0.63062113
-XLM  2062.0153870
-ADA  752.514104
-GRT  11.14324420
-USDC 102.810597
 AAVE 7.27496954
-SOL  9.467628126
+ADA  752.514104
 AMP  5582.45614384
-NEAR 0.000000000000003 (edit on GitHub: actually 0.0, rounding error)
+ETH2 0.63062113
+GRT  11.14324420
+NEAR 0.000000000000003
+SOL  9.467628126
+USDC 102.810597
+XLM  2062.0153870
 
 Sales and conversions:
 
 Asset    Result
 -----    ------
 FIDA   -413.650
-NEAR     29.660
 LTC   -2079.350
+NEAR     29.660
 ----------------------------------------
-
 # SUMMARY
 
 Result of all individual sales and conversion
