@@ -148,6 +148,8 @@ Asset    Result
 FIDA   -413.650
 LTC   -2079.350
 NEAR     29.660
+
+Number of sales and conversions: 3
 ----------------------------------------
 # SUMMARY
 
@@ -161,7 +163,5 @@ Negative results summed up:
 Positive results summed up:
 29.66
 
-
-Number of sales and conversions: 3
 --------------------------------------
 ```
