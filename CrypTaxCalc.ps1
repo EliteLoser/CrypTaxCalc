@@ -12,7 +12,7 @@ Param(
     [Switch]$ListUsedBuyQuantities
 )
 
-$Script:Version = '3.0.4'
+$Script:Version = '3.1.0'
 
 $Data = @{}
 #$Counter = 0
