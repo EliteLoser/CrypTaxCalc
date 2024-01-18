@@ -12,7 +12,7 @@ Param(
     [Switch]$ListUsedBuyQuantities
 )
 
-$Script:Version = '3.1.0'
+$Script:Version = '3.2.0'
 
 $Data = @{}
 #$Counter = 0
@@ -288,15 +288,13 @@ if (($SalesAndConversions = @($Result.Values.Where({$_.Type -match 'Sell|Convert
 "----------------------------------------`n"
 
 if ($AssetResults.Count -gt 0) {
-    @"
-# SUMMARY`n`nResult of all individual sales and conversion
-results (all results added up) for year ${Year}:
-"@
-    $AssetResults.Result | Measure-Object -Sum | Select-Object -ExpandProperty Sum
-    "`nNegative results summed up:"
-    $AssetResults.Result | Where-Object {$_ -lt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum
-    "`nPositive results summed up:"
-    $AssetResults.Result | Where-Object {$_ -gt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum
+    "# SUMMARY`n`nResult of all individual sales and conversion
+results (all results added up) for year ${Year}: " + ($AssetResults.Result | 
+    Measure-Object -Sum | Select-Object -ExpandProperty Sum)
+    "`nNegative results summed up: " + ($AssetResults.Result | 
+        Where-Object {$_ -lt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
+    "`nPositive results summed up: " + ($AssetResults.Result | 
+        Where-Object {$_ -gt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
     "`n--------------------------------------`n`n"
 }
 
