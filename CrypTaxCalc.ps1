@@ -129,7 +129,7 @@ function Invoke-TransactionParser {
         $Global:SvendsenTechBuyStack = $Global:SvendsenTechBuyStack | Select-Object -Skip 1
         Write-Verbose "Buy stack count after: $($Global:SvendsenTechBuyStack.Count)"
         Write-Verbose "Carry over sum is currently: $CarryOverSum"
-        Write-Verbose "Carry over Quantity is currently: $Quantity"
+        Write-Verbose "Carry over quantity is currently: $Quantity"
         Write-Verbose "Complete buy stack quantities: $($Global:SvendsenTechBuyStack.Value.'Quantity Transacted' -join ', ')"
         if ($Quantity -gt 0) {
             Invoke-TransactionParser -Transaction $Transaction -Quantity $Quantity -CarryOverSum $CarryOverSum
@@ -210,6 +210,7 @@ foreach ($Asset in $Data.Values.Asset | Sort-Object -Unique) {
 }
 # Calculate rewards and Coinbase learn (income) for the specified year.
 $CryptoIncome = @{}
+$CryptoIncomeCount = @{}
 foreach ($Transaction in $Data.Values) {
     <#Get-Content -LiteralPath $FilePath |
     Select-Object -Skip ($HeaderLine - 1) | 
@@ -221,13 +222,18 @@ foreach ($Transaction in $Data.Values) {
         #Write-Verbose "Year $Year. Processing a reward. Asset: $($Transaction.Asset). Quantity of tokens: $($Transaction.'Quantity Transacted'). Money: $($Transaction.'Total (inclusive of fees and/or spread)')."
         #Invoke-TransactionParser -Transaction $Transaction -Quantity $Transaction.Value.'Quantity Transacted'
         $CryptoIncome.($Transaction.Asset) += [Decimal]$Transaction.'Total (inclusive of fees and/or spread)'
+        $CryptoIncomeCount.($Transaction.Asset) += 1
     }
 }
 
 "Total sum of rewards in year $Year (taxable income): $('{0:N2}' -f (($CryptoIncome.Values | Measure-Object -Sum).Sum))`n`n"
 if ($CryptoIncome.Keys.Count -gt 0) {
     "Distribution of income:"
-    $CryptoIncome.GetEnumerator() | Format-Table -AutoSize
+    $CryptoIncome.GetEnumerator() | Sort-Object -Property Name | Format-Table -AutoSize
+}
+if ($CryptoIncomeCount.Keys.Count -gt 0) {
+    "`nNumber of rewards/income per asset:"
+    $CryptoIncomeCount.GetEnumerator() | Sort-Object -Property Name | Format-Table -AutoSize
 }
 
 # Amounts owned of each asset.
@@ -261,7 +267,7 @@ foreach ($Transaction in (#$Data.Values | Sort-Object -Property Timestamp) {
 }
 
 "Asset holdings at the end of year ${Year}:"
-$AssetHoldings.GetEnumerator() | Where-Object Value -gt 0 | Format-Table -AutoSize
+$AssetHoldings.GetEnumerator() | Where-Object Value -gt 0 | Sort-Object -Property Name | Format-Table -AutoSize
 #| Format-Table -AutoSize
 
 if (($SalesAndConversions = @($Result.Values.Where({$_.Type -match 'Sell|Convert'}))).Count -gt 0) {
@@ -276,7 +282,7 @@ if (($SalesAndConversions = @($Result.Values.Where({$_.Type -match 'Sell|Convert
             Result = $AssetResult
         }
     })
-    $AssetResults
+    $AssetResults | Sort-Object -Property Asset
 }
 
 "----------------------------------------`n"
