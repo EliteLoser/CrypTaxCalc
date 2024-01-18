@@ -288,8 +288,8 @@ if (($SalesAndConversions = @($Result.Values.Where({$_.Type -match 'Sell|Convert
 "----------------------------------------`n"
 
 if ($AssetResults.Count -gt 0) {
-    "# SUMMARY`n`nResult of all individual sales and conversion
-results (all results added up) for year ${Year}: " + ($AssetResults.Result | 
+    "# SUMMARY`n`nResult of all individual sales and conversion"
+    "results (all results added up) for year ${Year}: " + ($AssetResults.Result | 
     Measure-Object -Sum | Select-Object -ExpandProperty Sum)
     "`nNegative results summed up: " + ($AssetResults.Result | 
         Where-Object {$_ -lt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
