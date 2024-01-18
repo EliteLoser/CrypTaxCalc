@@ -284,7 +284,7 @@ if (($SalesAndConversions = @($Result.Values.Where({$_.Type -match 'Sell|Convert
     })
     $AssetResults | Sort-Object -Property Asset
 }
-
+"`nNumber of sales and conversions: " + $AssetResults.Count
 "----------------------------------------`n"
 
 if ($AssetResults.Count -gt 0) {
@@ -297,7 +297,6 @@ results (all results added up) for year ${Year}:
     $AssetResults.Result | Where-Object {$_ -lt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum
     "`nPositive results summed up:"
     $AssetResults.Result | Where-Object {$_ -gt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum
-    "`nNumber of sales and conversions: " + $AssetResults.Count
     "`n--------------------------------------`n`n"
 }
 
