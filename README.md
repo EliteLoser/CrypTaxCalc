@@ -1,6 +1,6 @@
 # CrypTaxCalc - a Coinbase transaction log parser
 
-Svendsen Tech's CrypTaxCalc is an open-source Coinbase transaction log parser to get the numbers you need for the tax reports.
+Svendsen Tech's CrypTaxCalc is an open-source Coinbase transaction log parser / tax calculator to get the numbers you need for the tax reports.
 
 It uses the cross-platform PowerShell framework's associated scripting language, available for macOS, Linux and Windows. You can read more about it here: https://github.com/PowerShell/PowerShell 
 
