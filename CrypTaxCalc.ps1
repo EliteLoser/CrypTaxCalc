@@ -12,7 +12,10 @@ Param(
     [Switch]$ListUsedBuyQuantities
 )
 
-$Script:Version = '3.2.0'
+$Script:Version = '3.3.0'
+
+# Version history, starting from 3.2.0 -> 3.3.0
+# v3.3.0: Add the used sort order to the output.
 
 $Data = @{}
 #$Counter = 0
@@ -66,7 +69,7 @@ function Invoke-TransactionParser {
             $Global:SvendsenTechBuyStack = $Global:SvendsenTechBuyStack | Select-Object -Skip 1
         }
         $NetGainOrLoss = [Math]::Round((([Decimal]$Transaction.Value.'Quantity Transacted' * [Decimal]$Transaction.Value.'Spot Price at Transaction' - `
-                [Decimal]$Transaction.Value.'Fees and/or Spread') - (
+            [Decimal]$Transaction.Value.'Fees and/or Spread') - (
                 $Quantity * [Decimal]$SpotPriceAtTransaction + $CarryOverSum)), 2)
         if ($Transaction.Value.'Transaction Type' -ne 'Send' -and `
             ([DateTime]$Transaction.Value.Timestamp).Year -eq $Year) {
@@ -271,7 +274,7 @@ $AssetHoldings.GetEnumerator() | Where-Object Value -gt 0 | Sort-Object -Propert
 #| Format-Table -AutoSize
 
 if (($SalesAndConversions = @($Result.Values.Where({$_.Type -match 'Sell|Convert'}))).Count -gt 0) {
-    "Sales and conversions:"
+    "Sales and conversions (sort order: $SortOrder):"
     $AssetResults = @(foreach ($SaleOrConversion in $SalesAndConversions) {
         $AssetResult = $Result.Values.Where({$_.Type -match 'Sell|Convert' -and $_.Asset -eq $SaleOrConversion.Asset}) |
             ForEach-Object {[Decimal]$_.NetGainOrLoss} |
@@ -299,8 +302,9 @@ if ($AssetResults.Count -gt 0) {
 }
 
 # Debug
-#$Global:CoinData = $Data
-#$Global:CoinResult = $Result
+$Global:SvendsenTechCoinData = $Data
+$Global:SvendsenTechCoinResult = $Result
+
 <#
 2023-03-21: Seeing so far inexplicable behaviour. I included sales from previous
 years, to correct a bug in the previous version of CrypTaxCalc where it
