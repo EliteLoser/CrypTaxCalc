@@ -141,7 +141,7 @@ SOL  9.467628126
 USDC 102.810597
 XLM  2062.0153870
 
-Sales and conversions:
+Sales and conversions (sort order: HPFO):
 
 Asset    Result
 -----    ------
