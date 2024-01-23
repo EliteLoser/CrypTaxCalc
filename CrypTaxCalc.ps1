@@ -15,7 +15,7 @@ Param(
     [Switch]$ListUsedBuyQuantities
 )
 Begin {
-    $Script:Version = '3.5.0'
+    $Script:Version = '3.6.0'
     $NoJson = $False
     try {
         # Simplified for starters.
@@ -320,6 +320,13 @@ End {
             }
         }
         $AssetHoldings2.Values | Sort-Object -Property Asset, USDValue | Format-Table -AutoSize
+        $UsdSum = $AssetHoldings2.Values | Measure-Object -Property USDValue -Sum | Select-Object -ExpandProperty Sum
+        $AlternateSum = $AssetHoldings2.Values | Measure-Object -Property AlternateCurrencyValue -Sum | Select-Object -ExpandProperty Sum
+        "Sum in USD: {0:N2}. -- Sum in ${HoldingsFinalTargetCurrency}: {1:N2}." -f $UsdSum, $AlternateSum
+        "Average $HoldingsFinalTargetCurrency value for $($AssetHoldings2.Values.Count
+            ) tokens: {0:N2}" -f ($AlternateSum / $AssetHoldings2.Values.Count)
+        "---------------------------------`n"
+
     }
 
     # The foreach with .GetEnumerator() works around the quirky data structure
