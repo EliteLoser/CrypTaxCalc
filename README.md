@@ -96,17 +96,16 @@ NEAR     29.660
 
 Number of sales and conversions: 3
 ----------------------------------------
+
+
 # SUMMARY
 
 Result of all individual sales and conversion
-results (all results added up) for year 2023:
--2463.34
+results (all results added up) for year 2023: -2463.34
 
-Negative results summed up:
--2493
+Negative results summed up: -2493
 
-Positive results summed up:
-29.66
+Positive results summed up: 29.66
 
 --------------------------------------
 ```
