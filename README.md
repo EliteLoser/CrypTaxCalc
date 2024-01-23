@@ -158,6 +158,9 @@ SOL     966.953               9838.161 NOK
 USDC    102.828               1046.209 NOK
 XLM     266.273               2709.163 NOK
 
+Sum in USD: 4,897.87. -- Sum in NOK: 49,226.40.
+Average NOK value for 10 tokens: 4922.64
+---------------------------------
 
 Sales and conversions (sort order: HPFO):
 
