@@ -12,9 +12,16 @@ Param(
     [Switch]$ListUsedBuyQuantities
 )
 
-$Script:Version = '3.3.0'
+$Script:Version = '3.3.1'
+
+# Debug mode. Prevents dynamic behavior, so it's not used in prod.
+#Set-StrictMode -Version Latest
 
 # Version history, starting from 3.2.0 -> 3.3.0
+# v3.3.1: # Fix a bug that occurred with -ListUsedBuyQuantities in use.
+          # It would not correctly report sales and conversions when that was in use.
+          # Now it does.
+
 # v3.3.0: Add the used sort order to the output.
 
 $Data = @{}
@@ -271,12 +278,17 @@ foreach ($Transaction in (#$Data.Values | Sort-Object -Property Timestamp) {
 
 "Asset holdings at the end of year ${Year}:"
 $AssetHoldings.GetEnumerator() | Where-Object Value -gt 0 | Sort-Object -Property Name | Format-Table -AutoSize
-#| Format-Table -AutoSize
 
-if (($SalesAndConversions = @($Result.Values.Where({$_.Type -match 'Sell|Convert'}))).Count -gt 0) {
-    "Sales and conversions (sort order: $SortOrder):"
+# The foreach with .GetEnumerator() works around the quirky data structure
+# that causes problems when you use -ListUsedBuyQuantities (the only difference
+# is in the exported "$SvendsenTechCoinResult" variable - the report on-screen is 
+# identical in both cases.
+$SalesAndConversions = @($Result.Values.Foreach({$_.GetEnumerator()}).Where({$_.Type -match 'Sell|Convert'}))
+if ($SalesAndConversions.Count -gt 0) {
+    "Sales and conversions (sort order: $($SortOrder.ToUpper())):"
     $AssetResults = @(foreach ($SaleOrConversion in $SalesAndConversions) {
-        $AssetResult = $Result.Values.Where({$_.Type -match 'Sell|Convert' -and $_.Asset -eq $SaleOrConversion.Asset}) |
+        $AssetResult = $Result.Values.Foreach({$_.GetEnumerator()}).Where(
+            {$_.Type -match 'Sell|Convert' -and $_.Asset -eq $SaleOrConversion.Asset}) |
             ForEach-Object {[Decimal]$_.NetGainOrLoss} |
             Measure-Object -Sum | 
             Select-Object -ExpandProperty Sum
