@@ -15,7 +15,7 @@ Param(
     [Switch]$ListUsedBuyQuantities
 )
 Begin {
-    $Script:Version = '3.4.0'
+    $Script:Version = '3.5.0'
     $NoJson = $False
     try {
         # Simplified for starters.
