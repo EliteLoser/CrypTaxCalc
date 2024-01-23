@@ -12,16 +12,19 @@ Param(
     [Switch]$ListUsedBuyQuantities
 )
 
-$Script:Version = '3.3.1'
+$Script:Version = '3.4.0'
 
 # Debug mode. Prevents dynamic behavior, so it's not used in prod.
 #Set-StrictMode -Version Latest
 
 # Version history, starting from 3.2.0 -> 3.3.0
+# v3.4.0: # Improve usability/accessibility of exported variables.
+          # Account for the bug with $Data being manipulated in memory
+          # sometimes by also exporting re-read CSV.
+          # Could be a bug in PowerShell (could also have been fixed by now).
 # v3.3.1: # Fix a bug that occurred with -ListUsedBuyQuantities in use.
           # It would not correctly report sales and conversions when that was in use.
           # Now it does.
-
 # v3.3.0: Add the used sort order to the output.
 
 $Data = @{}
@@ -280,7 +283,7 @@ foreach ($Transaction in (#$Data.Values | Sort-Object -Property Timestamp) {
 $AssetHoldings.GetEnumerator() | Where-Object Value -gt 0 | Sort-Object -Property Name | Format-Table -AutoSize
 
 # The foreach with .GetEnumerator() works around the quirky data structure
-# that causes problems when you use -ListUsedBuyQuantities (the only difference
+# that causes problems when you use -ListUsedBuyQuantities. The only difference
 # is in the exported "$SvendsenTechCoinResult" variable - the report on-screen is 
 # identical in both cases.
 $SalesAndConversions = @($Result.Values.Foreach({$_.GetEnumerator()}).Where({$_.Type -match 'Sell|Convert'}))
@@ -315,7 +318,12 @@ if ($AssetResults.Count -gt 0) {
 
 # Debug
 $Global:SvendsenTechCoinData = $Data
-$Global:SvendsenTechCoinResult = $Result
+$Global:SvendsenTechCoinDataRereadCSV = Get-Content -LiteralPath $FilePath |
+    Select-Object -Skip ($HeaderLine - 1) | 
+    ConvertFrom-Csv -Delimiter $Delimiter |
+    Where-Object {$_.Timestamp -match '\S'} | 
+    Sort-Object -Property Timestamp
+$Global:SvendsenTechCoinResult = $Result.foreach({$_.GetEnumerator()})
 
 <#
 2023-03-21: Seeing so far inexplicable behaviour. I included sales from previous
@@ -330,4 +338,12 @@ rounding, but it is only for _some_ of the quantities... Weird.
 
 2023-03-22: The bug seems fixed by rereading the CSV. Somehow the $Data
 variable is manipulated in memory.
+
+"LIFO: 0.00440380, 0.01146855, 0.02608290, 0.33290976
+FIFO: 0.33290976, 0.02163386, 0.01021055, 0.01587235
+HPFO: 0.00000000, 0.01021055, 0.33290976, 0.01587235
+LPFO: 0.00440380, 0.33290976, 0.01461435, 0.01146855" -split "`n" |
+     %{$h=@{}}{$h.($_.Split(':')[0]) = ($_ -split '[:,\s]+' | select -skip 1 |
+     %{[Decimal]$_} | measure-object -sum | select -Exp sum) }{$h}
 #>
+
