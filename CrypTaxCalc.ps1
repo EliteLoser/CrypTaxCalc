@@ -15,7 +15,7 @@ Param(
     [Switch]$ListUsedBuyQuantities
 )
 Begin {
-    $Script:Version = '3.6.0'
+    $Script:Version = '3.7.0'
     $NoJson = $False
     try {
         # Simplified for starters.
@@ -307,13 +307,14 @@ End {
         "Data from 2024-01-01-00-00-0x UTC. As found in the repo."
         "Only the top 100 coins on Coinmarketcap are available. Zero means 'not found'."
         $AssetHoldings2 = @{}
-        foreach ($Holding in $AssetHoldings.GetEnumerator() | Where-Object Value -gt 0) {
+        foreach ($Holding in $AssetHoldings.GetEnumerator() | Where-Object {$_.Value -gt 0}) {
             $UsdValue = $Holding.Value * [Decimal]($CryptoJson.data.where({$_.symbol -eq ($Holding.Name -replace 'ETH2', 'ETH')}).quote.usd.price)
             $AlternateCurrencyValue = $UsdValue * [Decimal]($CurrencyJson.where({
                 $_.ToCurrency -eq $HoldingsFinalTargetCurrency}).ToAmountNumerical
             )
             $AssetHoldings2.($Holding.Name) = [PSCustomObject]@{
                 Asset = $Holding.Name
+                TokenCount = $Holding.Value
                 USDValue = $UsdValue
                 AlternateCurrencyValue = $AlternateCurrencyValue
                 AlternateCurrency = $HoldingsFinalTargetCurrency
