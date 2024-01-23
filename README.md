@@ -146,20 +146,20 @@ BETA! Experimental feature!
 Data from 2024-01-01-00-00-0x UTC. As found in the repo.
 Only the top 100 coins on Coinmarketcap are available. Zero means 'not found'.
 
-Asset  USDValue AlternateCurrencyValue AlternateCurrency
------  -------- ---------------------- -----------------
-AAVE    803.573               8175.869 NOK
-ADA     449.707               4575.494 NOK
-AMP       0.000                  0.000 NOK
-ETH2   1447.875              14731.240 NOK
-GRT       2.112                 21.487 NOK
-NEAR      0.000                  0.000 NOK
-SOL     966.953               9838.161 NOK
-USDC    102.828               1046.209 NOK
-XLM     266.273               2709.163 NOK
+Asset TokenCount USDValue AlternateCurrencyValue AlternateCurrency
+----- ---------- -------- ---------------------- -----------------
+AAVE       7.275  803.573               8175.869 NOK
+ADA      752.514  449.707               4575.494 NOK
+AMP     5582.456    0.000                  0.000 NOK
+ETH2       0.631 1447.875              14731.240 NOK
+GRT       11.143    2.112                 21.487 NOK
+NEAR       0.000    0.000                  0.000 NOK
+SOL        9.468  966.953               9838.161 NOK
+USDC     102.811  102.828               1046.209 NOK
+XLM     2062.015  266.273               2709.163 NOK
 
-Sum in USD: 4,897.87. -- Sum in NOK: 49,226.40.
-Average NOK value for 10 tokens: 4922.64
+Sum in USD: 4,039.32. -- Sum in NOK: 41,097.62.
+Average NOK value for 9 tokens: 4,566.40
 ---------------------------------
 
 Sales and conversions (sort order: HPFO):
