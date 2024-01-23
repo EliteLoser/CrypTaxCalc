@@ -141,6 +141,24 @@ SOL  9.467628126
 USDC 102.810597
 XLM  2062.0153870
 
+
+BETA! Experimental feature!
+Data from 2024-01-01-00-00-0x UTC. As found in the repo.
+Only the top 100 coins on Coinmarketcap are available. Zero means 'not found'.
+
+Asset  USDValue AlternateCurrencyValue AlternateCurrency
+-----  -------- ---------------------- -----------------
+AAVE    803.573               8175.869 NOK
+ADA     449.707               4575.494 NOK
+AMP       0.000                  0.000 NOK
+ETH2   1447.875              14731.240 NOK
+GRT       2.112                 21.487 NOK
+NEAR      0.000                  0.000 NOK
+SOL     966.953               9838.161 NOK
+USDC    102.828               1046.209 NOK
+XLM     266.273               2709.163 NOK
+
+
 Sales and conversions (sort order: HPFO):
 
 Asset    Result
