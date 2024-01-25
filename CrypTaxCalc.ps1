@@ -11,27 +11,17 @@ Param(
     [Int]$HeaderLine = 8,
     [String]$CryptoJsonFile = './crypto-json-coinmarketcap-top-100-2024-01-01_02.00.01.json',
     [String]$CurrencyJsonFile = './usd_all_currencies-2024-01-01-00-00-00.json',
-    [String]$HoldingsFinalTargetCurrency = 'NOK',
+    [String]$HoldingsAlternateTargetCurrency = 'NOK',
     [Switch]$ListUsedBuyQuantities
 )
 Begin {
-    $Script:Version = '3.7.0'
-    $NoJson = $False
-    try {
-        # Simplified for starters.
-        $CryptoJson = Get-Content -LiteralPath $CryptoJsonFile -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
-        $CurrencyJson = Get-Content -LiteralPath $CurrencyJsonFile -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
-    }
-    catch {
-        Write-Warning ("Something failed with gathering crypto and/or currency rates from" + `
-            " the specified files: '$CryptoJsonFile' and '$CurrencyJsonFile'.")
-        Write-Warning "Will not perform calculations of holdings in USD and the optional other currency."
-        $NoJson = $True
-    }
+    $Script:Version = '3.8.0'
+    
     # Debug mode. Prevents dynamic behavior, so it's not used in prod.
     #Set-StrictMode -Version Latest
 
     # Version history, starting from 3.2.0 -> 3.3.0
+    # v3.8.0: Change variable/parameter name to a more betterer one.
     #v3.5.0: Add calculations to find value of crypto in USD and an optional other
             # target currency (for me 'NOK'). Add data source files as collected
             # on 2 AM GMT+2 January 1, 2024, meaning midnight 2024-01-01. And for 2023.
@@ -45,7 +35,20 @@ Begin {
             # It would not correctly report sales and conversions when that was in use.
             # Now it does.
     # v3.3.0: Add the used sort order to the output.
-
+    
+    $NoJson = $False
+    try {
+        # Simplified for starters.
+        $CryptoJson = Get-Content -LiteralPath $CryptoJsonFile -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+        $CurrencyJson = Get-Content -LiteralPath $CurrencyJsonFile -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+    }
+    catch {
+        Write-Warning ("Something failed with gathering crypto and/or currency rates from" + `
+            " the specified files: '$CryptoJsonFile' and '$CurrencyJsonFile'.")
+        Write-Warning "Will not perform calculations of holdings in USD and the optional other currency."
+        $NoJson = $True
+    }
+    
     $Data = @{}
     #$Counter = 0
     $Result = @{}
@@ -304,27 +307,27 @@ End {
 
     if ($NoJson -eq $False) {
         "BETA! Experimental feature!"
-        "Data from 2024-01-01-00-00-0x UTC. As found in the repo."
+        "Data from 2024-01-01-00-00-0x UTC. As found in the repo. Or when the specified file's data is from."
         "Only the top 100 coins on Coinmarketcap are available. Zero means 'not found'."
         $AssetHoldings2 = @{}
         foreach ($Holding in $AssetHoldings.GetEnumerator() | Where-Object {$_.Value -gt 0}) {
             $UsdValue = $Holding.Value * [Decimal]($CryptoJson.data.where({$_.symbol -eq ($Holding.Name -replace 'ETH2', 'ETH')}).quote.usd.price)
             $AlternateCurrencyValue = $UsdValue * [Decimal]($CurrencyJson.where({
-                $_.ToCurrency -eq $HoldingsFinalTargetCurrency}).ToAmountNumerical
+                $_.ToCurrency -eq $HoldingsAlternateTargetCurrency}).ToAmountNumerical
             )
             $AssetHoldings2.($Holding.Name) = [PSCustomObject]@{
-                Asset = $Holding.Name
+                Asset = $Holding.Name.ToUpper()
                 TokenCount = $Holding.Value
                 USDValue = $UsdValue
                 AlternateCurrencyValue = $AlternateCurrencyValue
-                AlternateCurrency = $HoldingsFinalTargetCurrency
+                AlternateCurrency = $HoldingsAlternateTargetCurrency.ToUpper()
             }
         }
         $AssetHoldings2.Values | Sort-Object -Property Asset, USDValue | Format-Table -AutoSize
         $UsdSum = $AssetHoldings2.Values | Measure-Object -Property USDValue -Sum | Select-Object -ExpandProperty Sum
         $AlternateSum = $AssetHoldings2.Values | Measure-Object -Property AlternateCurrencyValue -Sum | Select-Object -ExpandProperty Sum
         "Sum in USD: {0:N2}. -- Sum in ${HoldingsFinalTargetCurrency}: {1:N2}." -f $UsdSum, $AlternateSum
-        "Average $HoldingsFinalTargetCurrency value for $($AssetHoldings2.Values.Count
+        "Average $HoldingsAlternateTargetCurrency value for $($AssetHoldings2.Values.Count
             ) tokens: {0:N2}" -f ($AlternateSum / $AssetHoldings2.Values.Count)
         "---------------------------------`n"
 
@@ -386,13 +389,7 @@ End {
 
     2023-03-22: The bug seems fixed by rereading the CSV. Somehow the $Data
     variable is manipulated in memory.
-
-    "LIFO: 0.00440380, 0.01146855, 0.02608290, 0.33290976
-    FIFO: 0.33290976, 0.02163386, 0.01021055, 0.01587235
-    HPFO: 0.00000000, 0.01021055, 0.33290976, 0.01587235
-    LPFO: 0.00440380, 0.33290976, 0.01461435, 0.01146855" -split "`n" |
-        %{$h=@{}}{$h.($_.Split(':')[0]) = ($_ -split '[:,\s]+' | select -skip 1 |
-        %{[Decimal]$_} | measure-object -sum | select -Exp sum) }{$h}
     #>
 
 }
+
