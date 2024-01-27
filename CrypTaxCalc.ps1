@@ -372,15 +372,15 @@ End {
         "# SUMMARY`n`nResult of all individual sales and conversion"
         "results (all results added up) for year ${Year}: " + ($AssetResults.Result | 
         Measure-Object -Sum | Select-Object -ExpandProperty Sum)
-        "Net overall tax estimate: " + ($AssetResults.NetTax | 
+        "Net overall tax: " + ($AssetResults.NetTax | 
         Measure-Object -Sum | Select-Object -ExpandProperty Sum)
         "`nNegative results summed up: " + ($AssetResults.Result | 
             Where-Object {$_ -lt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
-        "Negative taxes (deductable) estimate summed up: " + ($AssetResults.NetTax | 
+        "Negative taxes (deducted) summed up: " + ($AssetResults.NetTax | 
             Where-Object {$_ -lt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
         "`nPositive results summed up: " + ($AssetResults.Result | 
             Where-Object {$_ -gt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
-        "Positive taxes estimate summed up: " + ($AssetResults.NetTax | 
+        "Positive taxes summed up: " + ($AssetResults.NetTax | 
             Where-Object {$_ -gt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
         
         "`n--------------------------------------`n`n"
