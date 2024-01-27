@@ -105,10 +105,10 @@ results (all results added up) for year 2023: -2463.34
 Net overall tax: -541.93
 
 Negative results summed up: -2493
-Negative taxes (deductible) estimate summed up: -548.46
+Negative taxes (deducted) summed up: -548.46
 
 Positive results summed up: 29.66
-Positive taxes estimate summed up: 6.53
+Positive taxes summed up: 6.53
 
 --------------------------------------
 ```
