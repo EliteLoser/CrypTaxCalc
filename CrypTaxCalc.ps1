@@ -15,12 +15,15 @@ Param(
     [Switch]$ListUsedBuyQuantities
 )
 Begin {
-    $Script:Version = '3.8.0'
+    $Script:Version = '3.9.0'
     
     # Debug mode. Prevents dynamic behavior, so it's not used in prod.
     #Set-StrictMode -Version Latest
 
     # Version history, starting from 3.2.0 -> 3.3.0
+    # v3.9.0: Add cumulative tax calculations to output.
+    # v3.8.1: Fix output bug where target currency would be $null/blank
+              # as a result of the variable name change in 3.8.0.
     # v3.8.0: Change variable/parameter name to a more betterer one.
     #v3.5.0: Add calculations to find value of crypto in USD and an optional other
             # target currency (for me 'NOK'). Add data source files as collected
@@ -326,7 +329,7 @@ End {
         $AssetHoldings2.Values | Sort-Object -Property Asset, USDValue | Format-Table -AutoSize
         $UsdSum = $AssetHoldings2.Values | Measure-Object -Property USDValue -Sum | Select-Object -ExpandProperty Sum
         $AlternateSum = $AssetHoldings2.Values | Measure-Object -Property AlternateCurrencyValue -Sum | Select-Object -ExpandProperty Sum
-        "Sum in USD: {0:N2}. -- Sum in ${HoldingsFinalTargetCurrency}: {1:N2}." -f $UsdSum, $AlternateSum
+        "Sum in USD: {0:N2}. -- Sum in ${HoldingsAlternateTargetCurrency}: {1:N2}." -f $UsdSum, $AlternateSum
         "Average $HoldingsAlternateTargetCurrency value for $($AssetHoldings2.Values.Count
             ) tokens: {0:N2}" -f ($AlternateSum / $AssetHoldings2.Values.Count)
         "---------------------------------`n"
@@ -349,6 +352,15 @@ End {
             [PSCustomObject]@{
                 Asset = $SaleOrConversion.Asset
                 Result = $AssetResult
+                NetTax = if ($AssetResult -gt 0) {
+                    [Math]::Round(($AssetResult * $GainTaxPercent / 100), 2)
+                }
+                elseif ($AssetResult -lt 0) {
+                    [Math]::Round(($AssetResult * $LossTaxPercent / 100), 2)
+                }
+                else {
+                    0
+                }
             }
         })
         $AssetResults | Sort-Object -Property Asset
@@ -360,10 +372,17 @@ End {
         "# SUMMARY`n`nResult of all individual sales and conversion"
         "results (all results added up) for year ${Year}: " + ($AssetResults.Result | 
         Measure-Object -Sum | Select-Object -ExpandProperty Sum)
+        "Net overall tax estimate: " + ($AssetResults.NetTax | 
+        Measure-Object -Sum | Select-Object -ExpandProperty Sum)
         "`nNegative results summed up: " + ($AssetResults.Result | 
+            Where-Object {$_ -lt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
+        "Negative taxes (deductable) estimate summed up: " + ($AssetResults.NetTax | 
             Where-Object {$_ -lt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
         "`nPositive results summed up: " + ($AssetResults.Result | 
             Where-Object {$_ -gt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
+        "Positive taxes estimate summed up: " + ($AssetResults.NetTax | 
+            Where-Object {$_ -gt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
+        
         "`n--------------------------------------`n`n"
     }
 
