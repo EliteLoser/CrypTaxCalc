@@ -102,10 +102,13 @@ Number of sales and conversions: 3
 
 Result of all individual sales and conversion
 results (all results added up) for year 2023: -2463.34
+Net overall tax: -541.93
 
 Negative results summed up: -2493
+Negative taxes (deductible) estimate summed up: -548.46
 
 Positive results summed up: 29.66
+Positive taxes estimate summed up: 6.53
 
 --------------------------------------
 ```
