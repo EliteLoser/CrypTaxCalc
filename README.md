@@ -67,8 +67,11 @@ XLM  2062.0153870
 
 
 BETA! Experimental feature!
-Data from 2024-01-01-00-00-0x UTC. As found in the repo.
-Only the top 100 coins on Coinmarketcap are available. Zero means 'not found'.
+Data from 2024-01-01-00-00-xx UTC. As found in the repo for 2023 and on.
+The JSON filenames should contain the calculation year+1 surrounded by hyphens
+(e.g. '-2024-' for the tax year 2023 and '-2023-' for the tax year 2022).
+Only the top 100 coins on Coinmarketcap are available.
+Zero means 'not found'.
 
 Asset TokenCount USDValue AlternateCurrencyValue AlternateCurrency
 ----- ---------- -------- ---------------------- -----------------
