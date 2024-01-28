@@ -15,12 +15,14 @@ Param(
     [Switch]$ListUsedBuyQuantities
 )
 Begin {
-    $Script:Version = '3.9.0'
+    $Script:Version = '3.11.0'
     
     # Debug mode. Prevents dynamic behavior, so it's not used in prod.
     #Set-StrictMode -Version Latest
 
     # Version history, starting from 3.2.0 -> 3.3.0
+    # v3.11.0: Better warning message about annual holdings calculations in the printed
+             # warning.
     # v3.10.0: Omit report of holdings values at year-end if the specified filenames
              # don't match "-$($Year+1)-" ("2024" for the year 2023). A crude mechanism to
              # avoid cluttering up the reports for previous years with meaningless and 
@@ -51,7 +53,9 @@ Begin {
         Write-Warning ("One or both of the specified files: '$CryptoJsonFile' and '$CurrencyJsonFile' don't contain the year+1 ($($Year+1)) " + `
             "in the filename, so the summary showing calculated values at New Year will not be shown because of " + `
             "the assumption that you are performing calculations for a different year than the data files " + `
-            "are for (the default is year 2023, meaning 2024 in the filenames, as of 2024-01-28).")
+            "are for (the default is year 2023, meaning 2024 in the filenames, as of 2024-01-28)." +`
+            "The JSON filenames should contain the calculation year+1 surrounded by hyphens" + `
+            "(e.g. '-2024-' for the tax year 2023 and '-2023-' for the tax year 2022).")
     }
     else {
         try {
