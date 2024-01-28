@@ -21,37 +21,51 @@ Begin {
     #Set-StrictMode -Version Latest
 
     # Version history, starting from 3.2.0 -> 3.3.0
+    # v3.10.0: Omit report of holdings values at year-end if the specified filenames
+             # don't match "-$($Year+1)-" ("2024" for the year 2023). A crude mechanism to
+             # avoid cluttering up the reports for previous years with meaningless and 
+             # incorrect data if you don't have the data source files available.
     # v3.9.0: Add cumulative tax calculations to output.
     # v3.8.1: Fix output bug where target currency would be $null/blank
-              # as a result of the variable name change in 3.8.0.
+            # as a result of the variable name change in 3.8.0.
     # v3.8.0: Change variable/parameter name to a more betterer one.
     #v3.5.0: Add calculations to find value of crypto in USD and an optional other
             # target currency (for me 'NOK'). Add data source files as collected
             # on 2 AM GMT+2 January 1, 2024, meaning midnight 2024-01-01. And for 2023.
             # Enjoy. Oh, and I added Begin, Process and End blocks, as the CmdletBinding
             # wants. Beta warning about this new feature, but it works during testing.
-    # v3.4.0: # Improve usability/accessibility of exported variables.
+            # (only for 2024, or 2023 if you specify the other files...).
+    # v3.4.0: Improve usability/accessibility of exported variables.
             # Account for the bug with $Data being manipulated in memory
             # sometimes by also exporting re-read CSV.
             # Could be a bug in PowerShell (could also have been fixed by now).
-    # v3.3.1: # Fix a bug that occurred with -ListUsedBuyQuantities in use.
+    # v3.3.1: Fix a bug that occurred with -ListUsedBuyQuantities in use.
             # It would not correctly report sales and conversions when that was in use.
             # Now it does.
     # v3.3.0: Add the used sort order to the output.
     
     $NoJson = $False
-    try {
-        # Simplified for starters.
-        $CryptoJson = Get-Content -LiteralPath $CryptoJsonFile -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
-        $CurrencyJson = Get-Content -LiteralPath $CurrencyJsonFile -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
-    }
-    catch {
-        Write-Warning ("Something failed with gathering crypto and/or currency rates from" + `
-            " the specified files: '$CryptoJsonFile' and '$CurrencyJsonFile'.")
-        Write-Warning "Will not perform calculations of holdings in USD and the optional other currency."
+    # Hacked on logic to crudely avoid cluttering up the report with incorrect values for previous years.
+    if ($CryptoJsonFile -notmatch "-$($Year+1)-" -or $CurrencyJsonFile -notmatch "-$($Year+1)-") {
         $NoJson = $True
+        Write-Warning ("One or both of the specified files: '$CryptoJsonFile' and '$CurrencyJsonFile' don't contain the year+1 ($($Year+1)) " + `
+            "in the filename, so the summary showing calculated values at New Year will not be shown because of " + `
+            "the assumption that you are performing calculations for a different year than the data files " + `
+            "are for (the default is year 2023, meaning 2024 in the filenames, as of 2024-01-28).")
     }
-    
+    else {
+        try {
+            # Simplified for starters.
+            $CryptoJson = Get-Content -LiteralPath $CryptoJsonFile -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+            $CurrencyJson = Get-Content -LiteralPath $CurrencyJsonFile -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+        }
+        catch {
+            Write-Warning ("Something failed with gathering crypto and/or currency rates from" + `
+                " the specified files: '$CryptoJsonFile' and '$CurrencyJsonFile'.`n" + `
+                "Will not perform calculations of holdings in USD and the optional alternate currency.")
+            $NoJson = $True
+        }
+    }
     $Data = @{}
     #$Counter = 0
     $Result = @{}
@@ -310,8 +324,11 @@ End {
 
     if ($NoJson -eq $False) {
         "BETA! Experimental feature!"
-        "Data from 2024-01-01-00-00-0x UTC. As found in the repo. Or when the specified file's data is from."
-        "Only the top 100 coins on Coinmarketcap are available. Zero means 'not found'."
+        "Data from $($Year+1)-01-01-00-00-xx UTC. As found in the repo for 2023 and on."
+        "The JSON filenames should contain the calculation year+1 surrounded by hyphens"
+        "(e.g. '-2024-' for the tax year 2023 and '-2023-' for the tax year 2022)."
+        "Only the top 100 coins on Coinmarketcap are available."
+        "Zero means 'not found'."
         $AssetHoldings2 = @{}
         foreach ($Holding in $AssetHoldings.GetEnumerator() | Where-Object {$_.Value -gt 0}) {
             $UsdValue = $Holding.Value * [Decimal]($CryptoJson.data.where({$_.symbol -eq ($Holding.Name -replace 'ETH2', 'ETH')}).quote.usd.price)
@@ -386,7 +403,8 @@ End {
         "`n--------------------------------------`n`n"
     }
 
-    # Debug
+    # Debug/feature.
+    Write-Verbose "'Exporting' 3 variables:`n`$SvendsenTechCoinData`n`$SvendsenTechCoinDataRereadCSV`n`$SvendsenTechCoinResult"
     $Global:SvendsenTechCoinData = $Data
     $Global:SvendsenTechCoinDataRereadCSV = Get-Content -LiteralPath $FilePath |
         Select-Object -Skip ($HeaderLine - 1) | 
