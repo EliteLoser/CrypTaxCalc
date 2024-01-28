@@ -91,15 +91,14 @@ Average NOK value for 9 tokens: 4,566.40
 
 Sales and conversions (sort order: HPFO):
 
-Asset    Result
------    ------
-FIDA   -413.650
-LTC   -2079.350
-NEAR     29.660
+Asset    Result   NetTax
+-----    ------   ------
+FIDA   -413.650  -91.000
+LTC   -2079.350 -457.460
+NEAR     29.660    6.530
 
 Number of sales and conversions: 3
 ----------------------------------------
-
 
 # SUMMARY
 
