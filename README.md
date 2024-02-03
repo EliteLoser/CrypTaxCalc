@@ -91,11 +91,11 @@ Average NOK value for 9 tokens: 4,566.40
 
 Sales and conversions (sort order: HPFO):
 
-Asset    Result   NetTax
------    ------   ------
-FIDA   -413.650  -91.000
-LTC   -2079.350 -457.460
-NEAR     29.660    6.530
+Asset    Result   NetTax TaxPercentage
+-----    ------   ------ -------------
+FIDA   -413.650  -91.000       -22.000
+LTC   -2079.350 -457.460       -22.000
+NEAR     29.660    6.530        22.000
 
 Number of sales and conversions: 3
 ----------------------------------------
@@ -104,12 +104,12 @@ Number of sales and conversions: 3
 
 Result of all individual sales and conversion
 results (all results added up) for year 2023: -2463.34
-Net overall tax: -541.93
+Net overall tax (loss tax: -22%, gain tax: 22%): -541.93
 
 Negative results summed up: -2493
-Negative taxes (deducted) summed up: -548.46
+Negative taxes (deducted) summed up (loss tax: -22%): -548.46
 
-Positive results summed up: 29.66
+Positive results summed up (gain tax: 22%): 29.66
 Positive taxes summed up: 6.53
 
 --------------------------------------
