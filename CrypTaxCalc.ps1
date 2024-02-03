@@ -15,12 +15,13 @@ Param(
     [Switch]$ListUsedBuyQuantities
 )
 Begin {
-    $Script:Version = '3.11.0'
+    $Script:Version = '3.12.0'
     
     # Debug mode. Prevents dynamic behavior, so it's not used in prod.
     #Set-StrictMode -Version Latest
-
+    
     # Version history, starting from 3.2.0 -> 3.3.0
+    # v3.12.0: Add percentages for the taxes to output (asymmetrical taxes are supported).
     # v3.11.0: Better warning message about annual holdings calculations in the printed
              # warning.
     # v3.10.0: Omit report of holdings values at year-end if the specified filenames
@@ -54,7 +55,7 @@ Begin {
             "in the filename, so the summary showing calculated values at New Year will not be shown because of " + `
             "the assumption that you are performing calculations for a different year than the data files " + `
             "are for (the default is year 2023, meaning 2024 in the filenames, as of 2024-01-28)." +`
-            "The JSON filenames should contain the calculation year+1 surrounded by hyphens" + `
+            "The JSON filenames should contain the calculation year+1 surrounded by hyphens " + `
             "(e.g. '-2024-' for the tax year 2023 and '-2023-' for the tax year 2022).")
     }
     else {
@@ -382,6 +383,15 @@ End {
                 else {
                     0
                 }
+                TaxPercentage = if ($AssetResult -gt 0) {
+                    $GainTaxPercent
+                }
+                elseif ($AssetResult -lt 0) {
+                    -1 * $LossTaxPercent
+                }
+                else {
+                    0
+                }
             }
         })
         $AssetResults | Sort-Object -Property Asset
@@ -393,13 +403,13 @@ End {
         "# SUMMARY`n`nResult of all individual sales and conversion"
         "results (all results added up) for year ${Year}: " + ($AssetResults.Result | 
         Measure-Object -Sum | Select-Object -ExpandProperty Sum)
-        "Net overall tax: " + ($AssetResults.NetTax | 
+        "Net overall tax (loss tax: -$LossTaxPercent%, gain tax: $GainTaxPercent%): " + ($AssetResults.NetTax | 
         Measure-Object -Sum | Select-Object -ExpandProperty Sum)
         "`nNegative results summed up: " + ($AssetResults.Result | 
             Where-Object {$_ -lt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
-        "Negative taxes (deducted) summed up: " + ($AssetResults.NetTax | 
+        "Negative taxes (deducted) summed up (loss tax: -$LossTaxPercent%): " + ($AssetResults.NetTax | 
             Where-Object {$_ -lt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
-        "`nPositive results summed up: " + ($AssetResults.Result | 
+        "`nPositive results summed up (gain tax: $GainTaxPercent%): " + ($AssetResults.Result | 
             Where-Object {$_ -gt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
         "Positive taxes summed up: " + ($AssetResults.NetTax | 
             Where-Object {$_ -gt 0 } | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
