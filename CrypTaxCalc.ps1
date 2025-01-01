@@ -9,18 +9,20 @@ Param(
     [Parameter(Mandatory)][ValidateSet('FIFO', 'LIFO', 'HPFO', 'LPFO')][String]$SortOrder,
     [String]$Delimiter = ',',
     [Int]$HeaderLine = 8,
-    [String]$CryptoJsonFile = './crypto-json-coinmarketcap-top-100-2024-01-01_02.00.01.json',
-    [String]$CurrencyJsonFile = './usd_all_currencies-2024-01-01-00-00-00.json',
+    [String]$CryptoJsonFile = './coinmarketcapdata_hourly/coinmarketcap-top-1000-2025-01-01-00-00-0x.json',
+    [String]$CurrencyJsonFile = './usd_all_currencies_rates_hourly/usd_all_currencies-2025-01-01_00.00.14.json',
     [String]$HoldingsAlternateTargetCurrency = 'NOK',
     [Switch]$ListUsedBuyQuantities
 )
 Begin {
-    $Script:Version = '3.12.0'
+    $Script:Version = '4.0.0'
     
     # Debug mode. Prevents dynamic behavior, so it's not used in prod.
     #Set-StrictMode -Version Latest
     
     # Version history, starting from 3.2.0 -> 3.3.0
+    # v4.0.0: 2025-01-01, accounting for changes in the CSV format. The CSV format has changed, 
+    #         so the script has to be updated.
     # v3.12.0: Add percentages for the taxes to output (asymmetrical taxes are supported).
     # v3.11.0: Better warning message about annual holdings calculations in the printed
              # warning.
@@ -105,10 +107,10 @@ End {
                     UsedQuantity = $Quantity
                     TotalBuyQuantity = [Decimal]$Global:SvendsenTechBuyStack[0].Value.'Quantity Transacted'
                     RemainderQuantityOfSale = 0 #$RemainderQuantityOfSale
-                    Rate = [Decimal]$Global:SvendsenTechBuyStack[0].Value.'Spot Price at Transaction'
-                    UsedPurchaseValue = [Math]::Round(([Decimal]$Global:SvendsenTechBuyStack[0].Value.'Spot Price at Transaction' * $Quantity), 2)
-                    TotalPurchaseValue = [Math]::Round(([Decimal]$Global:SvendsenTechBuyStack[0].Value.'Spot Price at Transaction' * [Decimal]$Global:SvendsenTechBuyStack[0].Value.'Quantity Transacted'), 2)
-                    Fee = [Math]::Round(([Decimal]$Global:SvendsenTechBuyStack[0].Value.'Fees and/or Spread'), 2)
+                    Rate = [Decimal]($Global:SvendsenTechBuyStack[0].Value.'Price at Transaction' -replace '[^\d.-]')
+                    UsedPurchaseValue = [Math]::Round(([Decimal]($Global:SvendsenTechBuyStack[0].Value.'Price at Transaction' -replace '[^\d.-]') * $Quantity), 2)
+                    TotalPurchaseValue = [Math]::Round(([Decimal]($Global:SvendsenTechBuyStack[0].Value.'Price at Transaction' -replace '[^\d.-]') * [Decimal]$Global:SvendsenTechBuyStack[0].Value.'Quantity Transacted'), 2)
+                    Fee = [Math]::Round(([Decimal]($Global:SvendsenTechBuyStack[0].Value.'Fees and/or Spread' -replace '[^\d.\-]')), 2)
                     DateID = $Global:SvendsenTechBuyStack[0].Value.Timestamp
                     Type = "UsedPurchase"
                 })
@@ -118,12 +120,12 @@ End {
             # If the remaining quantity is 0 and it is the last buy stack element, we
             # get warnings of a null array. Storing the value we need for calculations in the
             # returned PSCustomObject.
-            $SpotPriceAtTransaction = $Global:SvendsenTechBuyStack[0].Value.'Spot Price at Transaction'
+            $SpotPriceAtTransaction = $Global:SvendsenTechBuyStack[0].Value.'Price at Transaction'
             if ([Decimal]$Global:SvendsenTechBuyStack[0].Value.'Quantity Transacted' -eq 0) {
                 Write-Verbose "Buy stack Quantity is 0. Popping it from the array as it is used up."
                 $Global:SvendsenTechBuyStack = $Global:SvendsenTechBuyStack | Select-Object -Skip 1
             }
-            $NetGainOrLoss = [Math]::Round((([Decimal]$Transaction.Value.'Quantity Transacted' * [Decimal]$Transaction.Value.'Spot Price at Transaction' - `
+            $NetGainOrLoss = [Math]::Round((([Decimal]$Transaction.Value.'Quantity Transacted' * [Decimal]$Transaction.Value.'Price at Transaction' - `
                 [Decimal]$Transaction.Value.'Fees and/or Spread') - (
                     $Quantity * [Decimal]$SpotPriceAtTransaction + $CarryOverSum)), 2)
             if ($Transaction.Value.'Transaction Type' -ne 'Send' -and `
@@ -131,10 +133,10 @@ End {
                 $Result[$Transaction.Name] += @([PSCustomObject]@{
                     Asset = $Transaction.Value.Asset
                     Quantity = $Transaction.Value.'Quantity Transacted'
-                    Rate = [Decimal]$Transaction.Value.'Spot Price at Transaction'
+                    Rate = [Decimal]$Transaction.Value.'Price at Transaction'
                     PurchaseValue = [Math]::Round(($Quantity * [Decimal]$SpotPriceAtTransaction + $CarryOverSum), 2)
-                    SellValue = [Math]::Round(([Decimal]$Transaction.Value.'Quantity Transacted' * [Decimal]$Transaction.Value.'Spot Price at Transaction'), 2)
-                    NetSellValue = [Math]::Round(([Decimal]$Transaction.Value.'Quantity Transacted' * [Decimal]$Transaction.Value.'Spot Price at Transaction' `
+                    SellValue = [Math]::Round(([Decimal]$Transaction.Value.'Quantity Transacted' * [Decimal]$Transaction.Value.'Price at Transaction'), 2)
+                    NetSellValue = [Math]::Round(([Decimal]$Transaction.Value.'Quantity Transacted' * [Decimal]$Transaction.Value.'Price at Transaction' `
                         - [Decimal]$Transaction.Value.'Fees and/or Spread'), 2)
                     Fee = [Math]::Round(([Decimal]$Transaction.Value.'Fees and/or Spread'), 2)
                     NetGainOrLoss = $NetGainOrLoss
@@ -168,10 +170,10 @@ End {
                     UsedQuantity = [Decimal]$Global:SvendsenTechBuyStack[0].Value.'Quantity Transacted'
                     TotalBuyQuantity = [Decimal]$Global:SvendsenTechBuyStack[0].Value.'Quantity Transacted'
                     RemainderQuantityOfSale = $Quantity
-                    Rate = [Decimal]$Global:SvendsenTechBuyStack[0].Value.'Spot Price at Transaction'
-                    UsedPurchaseValue = [Math]::Round(([Decimal]$Global:SvendsenTechBuyStack[0].Value.'Spot Price at Transaction' * [Decimal]$Global:SvendsenTechBuyStack[0].Value.'Quantity Transacted'), 2)
-                    TotalPurchaseValue = [Math]::Round(([Decimal]$Global:SvendsenTechBuyStack[0].Value.'Spot Price at Transaction' * [Decimal]$Global:SvendsenTechBuyStack[0].Value.'Quantity Transacted'), 2)
-                    Fee = [Math]::Round(([Decimal]$Global:SvendsenTechBuyStack[0].Value.'Fees and/or Spread'), 2)
+                    Rate = [Decimal]($Global:SvendsenTechBuyStack[0].Value.'Price at Transaction' -replace '[^\d.-]')
+                    UsedPurchaseValue = [Math]::Round(([Decimal]($Global:SvendsenTechBuyStack[0].Value.'Price at Transaction' -replace '[^\d.-]') * [Decimal]$Global:SvendsenTechBuyStack[0].Value.'Quantity Transacted'), 2)
+                    TotalPurchaseValue = [Math]::Round(([Decimal]($Global:SvendsenTechBuyStack[0].Value.'Price at Transaction' -replace '[^\d.-]') * [Decimal]$Global:SvendsenTechBuyStack[0].Value.'Quantity Transacted'), 2)
+                    Fee = [Math]::Round(([Decimal]($Global:SvendsenTechBuyStack[0].Value.'Fees and/or Spread' -replace '[^\d.\-]')), 2)
                     DateID = $Global:SvendsenTechBuyStack[0].Value.Timestamp
                     Type = "UsedPurchase"
                 })
@@ -182,7 +184,7 @@ End {
             # This is the taxable Quantity to "carry over". Can cumulate across several processed buys
             # to cover a sale.
             $CarryOverSum += ([Decimal]$Global:SvendsenTechBuyStack[0].Value.'Quantity Transacted' * `
-                [Decimal]$Global:SvendsenTechBuyStack[0].Value.'Spot Price at Transaction')
+                [Decimal]($Global:SvendsenTechBuyStack[0].Value.'Price at Transaction' -replace '[^\d.-]'))
             Write-Verbose "Popping out first buy stack element as it is used up. Buy stack count before: $($Global:SvendsenTechBuyStack.Count)"
             $Global:SvendsenTechBuyStack = $Global:SvendsenTechBuyStack | Select-Object -Skip 1
             Write-Verbose "Buy stack count after: $($Global:SvendsenTechBuyStack.Count)"
@@ -237,13 +239,13 @@ End {
             $Global:SvendsenTechBuyStack = @($Data.GetEnumerator() |
                 Where-Object {$_.Value.'Transaction Type' -match 'Buy|Learn|Reward|Receive' -and `
                 [DateTime]$_.Value.'Timestamp' -le $SellDate -and $_.Value.Asset -eq $Asset} | 
-                Sort-Object -Property @{Expression = {[Decimal]$_.Value.'Spot Price at Transaction'}; Descending = $True})
+                Sort-Object -Property @{Expression = {[Decimal]$_.Value.'Price at Transaction'}; Descending = $True})
         }
         elseif ($SortOrder -eq 'LPFO') {
             $Global:SvendsenTechBuyStack = @($Data.GetEnumerator() |
                 Where-Object {$_.Value.'Transaction Type' -match 'Buy|Learn|Reward|Receive' -and `
                 [DateTime]$_.Value.'Timestamp' -le $SellDate -and $_.Value.Asset -eq $Asset} | 
-                Sort-Object -Property @{Expression = {[Decimal]$_.Value.'Spot Price at Transaction'}})
+                Sort-Object -Property @{Expression = {[Decimal]$_.Value.'Price at Transaction'}})
         }
         #if ($Global:SvendsenTechBuyStack.Count -eq 0) {
         #    Write-Error "No purchases found before or in this year. Aborting." -ErrorAction Stop
@@ -279,7 +281,7 @@ End {
             #Get-RelevantBuyStack -SellDate $Transaction.Value.Timestamp
             #Write-Verbose "Year $Year. Processing a reward. Asset: $($Transaction.Asset). Quantity of tokens: $($Transaction.'Quantity Transacted'). Money: $($Transaction.'Total (inclusive of fees and/or spread)')."
             #Invoke-TransactionParser -Transaction $Transaction -Quantity $Transaction.Value.'Quantity Transacted'
-            $CryptoIncome.($Transaction.Asset) += [Decimal]$Transaction.'Total (inclusive of fees and/or spread)'
+            $CryptoIncome.($Transaction.Asset) += [Decimal]($Transaction.'Total (inclusive of fees and/or spread)' -replace '[^\d.-]')
             $CryptoIncomeCount.($Transaction.Asset) += 1
         }
     }
